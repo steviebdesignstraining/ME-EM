@@ -1,0 +1,13 @@
+[
+    {
+        "emailAddress": "janedoe@gmail.com",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "phoneNumber": "07791969230",
+        "country": "United Kingdom",
+        "address": "207 Northwood Road",
+        "countyState": "Surrey",
+        "postcode": "CR7 8HP",
+        "city": "London"
+    }
+]

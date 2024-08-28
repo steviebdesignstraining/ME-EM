@@ -1,0 +1,9 @@
+[
+    {
+        "cardNumber": "4242 4242 4242 4242",
+        "expirationDate": "05//29",
+        "cvv": "123",
+        "fullName": "Jane Doe",
+        "postcode": "CR7 8HP"
+    }
+]
