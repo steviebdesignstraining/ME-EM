@@ -15,7 +15,7 @@ jobs:
         node-version: 18
     - name: Install dependencies
       run: npm install
-      working-directory: ./frontend  # Replace 'frontend' with your actual directory name
+      working-directory: ./frontend  # Ensure 'frontend' is the correct subdirectory
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
       working-directory: ./frontend
@@ -26,5 +26,5 @@ jobs:
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
-        path: frontend/playwright-report/  # Adjust this path if needed
+        path: frontend/playwright-report/
         retention-days: 30
