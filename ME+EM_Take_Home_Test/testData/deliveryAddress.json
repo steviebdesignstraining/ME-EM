@@ -9,5 +9,16 @@
         "countyState": "Surrey",
         "postcode": "CR7 8HP",
         "city": "London"
+    },
+    {
+        "emailAddress": "janedoe@gmail.com",
+        "firstName": "Rain",
+        "lastName": "",
+        "phoneNumber": "8968689",
+        "country": "United Kingdom",
+        "address": "Flat 2 James House",
+        "countyState": "Surrey",
+        "postcode": "",
+        "city": "St James"
     }
 ]

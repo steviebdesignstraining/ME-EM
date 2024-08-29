@@ -1,5 +1,5 @@
 import { Page, expect } from "@playwright/test";
-import FormActions from "../sections/paymentForm.section";
+import paymentFormActions from "../sections/paymentForm.section";
 import testData from "../testData/deliveryAddress.json";
 
 
@@ -11,8 +11,8 @@ export default class PaymentPage {
   }
 
 async paymentDetails (page) {
-    const form = new FormActions(page);
-    await form.enterPaymentDetails()
+    const form1 = new paymentFormActions(page, 0);
+    await form1.enterPaymentDetails()
 };
 
 async finalConfirmationOfOrder (page) {

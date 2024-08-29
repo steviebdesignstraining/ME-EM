@@ -4,10 +4,10 @@ import testData from "../testData/deliveryAddress.json";
 export default class FormActions {
     page: Page;
     formDetails: any;
-
-    constructor(page: Page) {
+    // Update the constructor to accept two arguments
+    constructor(page: Page, index: number = 0) {
         this.page = page;
-        this.formDetails = JSON.parse(JSON.stringify(testData[0])); //  // Use the first object in the array
+        this.formDetails = JSON.parse(JSON.stringify(testData[index])); // Use the object at the specified index in the array
     }
 
     // Form Field Selectors and Actions
@@ -30,6 +30,7 @@ export default class FormActions {
     public async enterFormDetails() {
         console.log('Filling first name...');
         await this.page.getByLabel('First Name*').scrollIntoViewIfNeeded();
+        await this.page.getByLabel('First Name*').click()
         await this.firstName();
         console.log('Filling last name...');
         await this.lastName();

@@ -5,9 +5,9 @@ export default class PaymentActions {
     page: Page;
     paymentDetails: any;
 
-    constructor(page: Page) {
+    constructor(page: Page, index: number = 0) {
         this.page = page;
-        this.paymentDetails = JSON.parse(JSON.stringify(testData[0])); // Assuming the first test data object is used
+        this.paymentDetails = JSON.parse(JSON.stringify(testData[index])); // Use the object at the specified index in the array
     }
 
     // Form Field Selectors and Actions

@@ -2,7 +2,7 @@ import { Page, expect } from "@playwright/test";
 import FormActions from "../sections/deliveryFormActions.section";
 import testData from "../testData/deliveryAddress.json";
 
-const formDetails = JSON.parse(JSON.stringify(testData[0])); //  // Use the first object in the array
+// const formDetails = JSON.parse(JSON.stringify(testData[0])); //  // Use the first object in the array
 
 
 export default class ItemsPage {
@@ -10,9 +10,25 @@ export default class ItemsPage {
     this.page = page;
   }
 
+  async handleIframes(page) {
+    // Detect iframes and handle them
+    const iframes = await page.$$('iframe');
+    if (iframes.length > 0) {
+      console.log(`Found ${iframes.length} iframes.`);
+      for (const iframe of iframes) {
+        const frame = await iframe.contentFrame();
+        if (frame) {
+          // Perform actions inside the iframe if needed
+          // Example: close or log something within the iframe
+        }
+      }
+    }
+  }
+  
+
   async popupCookies() {
     const iframeButton = this.page.frameLocator('.onetrust-consent-sdk').getByRole('button', { name: 'Accept All Cookies' });
-    await iframeButton.isVisible( /*{timeout: 3000}*/ )
+    await iframeButton.isVisible( {timeout: 30000} )
     await this.page.getByRole('button', { name: 'Accept All Cookies' }).click()
   }
 
@@ -31,7 +47,20 @@ export default class ItemsPage {
   }
 
   async itemColourBlack() {
-    await this.page.getByLabel('Black').click();
+    for (let i = 0; i < 3; i++) {
+        try {
+            await this.page.getByLabel('Black').click({timeout: 30000});
+            break; // Break the loop if click is successful
+        } catch (error) {
+            console.log(`Attempt ${i + 1} failed. Retrying...`);
+            await this.page.waitForTimeout(1000); // Wait for 1 second before retrying
+        }
+    }
+  }
+
+  async reloadPage() {
+    // Reload or Refresh Page
+    await this.page.reload();
   }
 
   async itemSizeDropdown(page) {
@@ -71,6 +100,8 @@ export default class ItemsPage {
     const addToBagButton = this.page.getByRole('button', { name: 'Add to Bag' });
     await addToBagButton.waitFor({ state: 'visible' });
     await addToBagButton.click();
+    // Call handleIframes in your test where needed
+    await this.handleIframes(page);
 
     // Wait until cart count updates to 1
     const cartLocator = this.page.getByLabel('Cart', { exact: true });
@@ -79,10 +110,13 @@ export default class ItemsPage {
 }
 
 async itemSizeDropdown2(page) {
-    // Click dropdown
-    await this.page.getByTestId('size-select-button-dropdown').click();
-    
-    
+    try {
+      // Disable iframes by removing them
+      await page.evaluate(() => {
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(iframe => iframe.remove());
+      });
+        
     // Click dropdown
     await this.page.getByTestId('size-select-button-dropdown').click();
 
@@ -91,34 +125,48 @@ async itemSizeDropdown2(page) {
     const dropdownList = this.page.getByRole('option');
     await dropdownList.filter({ hasText: 'UK 10' }).waitFor({ state: 'visible' });
 
+    await this.handleIframes(page);
+
     // Select size
     await dropdownList.filter({ hasText: 'UK 10' }).click();
+
+    await this.handleIframes(page);
+
     
-    // Add to Bag
-    const addToBagButton = this.page.getByRole('button', { name: 'Add to Bag' });
-    await addToBagButton.waitFor({ state: 'visible' });
-    await addToBagButton.click();
-
-        // Close popup that appears
-        try {
-            // Attempt to locate the popup using its class
-            const popupLocator = page.locator('.custEmailPopupBox');
-            const closeButtonLocator = popupLocator.locator('.close');
-    
-            // Check if the popup is visible
-            if (await popupLocator.isVisible({ timeout: 3000 })) {
-                // If visible, click the close button
-                await closeButtonLocator.click();
-                console.log("Popup closed successfully.");
-            } else {
-                console.log("Popup not visible.");
-            }
-        } catch (error) {
-            console.log("Popup did not appear or there was an error:", error);
-        }    
-
-}
-
+      // Add to Bag
+      const addToBagButton = this.page.getByRole('button', { name: 'Add to Bag' });
+      await addToBagButton.waitFor({ state: 'visible', timeout: 120000 });
+      await addToBagButton.click();
+  
+      // Handle popup
+      await this.handlePopup2();
+    } catch (error) {
+      console.error('Error in itemSizeDropdown2 function:', error);
+      throw error;
+    }
+  }
+  
+  private async handlePopup2() {
+    try {
+      const popupLocator = this.page.locator('.custEmailPopupBox');
+      const closeButtonLocator = popupLocator.locator('.close');
+  
+      // Wait for popup to be visible and attempt to close it
+      await popupLocator.waitFor({ state: 'visible', timeout: 3000 });
+      if (await popupLocator.isVisible()) {
+        await closeButtonLocator.click();
+        console.log("Popup closed successfully.");
+      } else {
+        console.log("Popup not visible.");
+      }
+    } catch (error) {
+      console.log("Popup did not appear or there was an error:", error);
+    }
+  }
+  
+  
+  
+  
 async clickOutOfModal() {
     const panel = this.page.locator('.flex h-full flex-col').getByTestId('cart-item-product-info').filter({ hasText: 'Palazzo Pant' })
     await expect(panel).toBeVisible()
@@ -144,10 +192,13 @@ async addMultipleItems(page) {
     await addToBagButton.click();
 }
 
-async addItemswithSizeSelected(page) {    
+async addItemswithSizeSelected(page) {
+    await this.page.getByTestId('size-select-button-dropdown').click()
+    
     // Wait for the dropdown to be visible
-    const dropdownList = this.page.getByTestId('size-select-button-dropdown');
-    await dropdownList.filter({ hasText: 'UK 10' }).waitFor({ state: 'visible' });    
+    const dropdownList = this.page.getByRole('option', { name: 'UK 10' });
+    await dropdownList.filter({ hasText: 'UK 10' }).waitFor({ state: 'visible' });
+    await dropdownList.click()    
     // Add to Bag
     const addToBagButton = this.page.getByRole('button', { name: 'Add to Bag' });
     await this.page.waitForTimeout(1000); // Wait for 1 second before retrying
@@ -169,11 +220,11 @@ async verifyOneItem(page) {
     await expect(cartLocator).toHaveText('1', { timeout: 3000 })    
 }
 
-async verifythreeItem(page) {
+async verifyFourItem(page) {
     // Wait until cart count updates to 1
     const cartLocator = this.page.getByLabel('Cart', { exact: true });
-    await cartLocator.getByText('3').waitFor({ state: 'visible' });
-    await expect(cartLocator).toHaveText('3', { timeout: 3000 })    
+    await cartLocator.getByText('4').waitFor({ state: 'visible' });
+    await expect(cartLocator).toHaveText('4', { timeout: 3000 })    
 }
 
 async addShoesItem() {
@@ -192,16 +243,56 @@ async addShoesItem() {
     // Using alternative locators for the shoe title link
     const shoeTitleLink = this.page.locator('a').filter({ hasText: 'Flannel Slip-On Trainer' });
     await shoeTitleLink.waitFor({ state: 'visible', timeout: 10000 });
-    await shoeTitleLink.click({ timeout: 30000 });
+    for (let i = 0; i < 3; i++) {
+        try {
+            await shoeTitleLink.click({ timeout: 30000 });
+            break; // Break the loop if click is successful
+        } catch (error) {
+            console.log(`Attempt ${i + 1} failed. Retrying...`);
+            await this.page.waitForTimeout(1000); // Wait for 1 second before retrying
+        }
 
-    // const shoePageTitle = this.page.getByTestId('product-detail-block-product-title');
-    // await shoePageTitle.waitFor({ state: 'visible', timeout: 10000 });
-    // await expect(shoePageTitle).toHaveText('Flannel Slip-On Trainer');
+    }
 
-    // // Click the shoe size button
-    // const sizeButton = this.page.getByRole('button', { name: '38.5 (UK 5.5)' });
-    // await sizeButton.waitFor({ state: 'visible', timeout: 10000 }); // Ensure size button is visible
-    // await sizeButton.click({ timeout: 5000 }); // Attempt to click size button
+    const shoePageTitle = this.page.getByTestId('product-detail-block-product-title');
+    await shoePageTitle.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(shoePageTitle).toHaveText('Flannel Slip-On Trainer');
+
+    // Click the shoe size button
+    const sizeDropDown = this.page.getByTestId('size-select-button-dropdown')
+    await sizeDropDown.waitFor({ state: 'visible', timeout: 10000 }); // Ensure size button is visible
+    await sizeDropDown.click({ timeout: 5000 }); // Attempt to click size button
+
+    // Wait for the dropdown to be visible
+    const dropdownList = this.page.getByRole('option');
+    await dropdownList.filter({ hasText: '39 (UK 6)' }).waitFor({ state: 'visible' });
+    
+    // Select size
+    await dropdownList.filter({ hasText: '39 (UK 6)' }).click();
+    
+    // Click Add to bag
+    const addToBagButton = this.page.getByRole('button', { name: 'Add to Bag' });
+    await addToBagButton.waitFor({ state: 'visible' });
+    await addToBagButton.click();
+
+    // Close popup that appears
+    try {
+        // Attempt to locate the popup using its class
+        const popupLocator = this.page.locator('.custEmailPopupBox');
+        const closeButtonLocator = popupLocator.locator('.close');
+
+        // Check if the popup is visible
+        if (await popupLocator.isVisible({ timeout: 3000 })) {
+            // If visible, click the close button
+            await closeButtonLocator.click();
+            console.log("Popup closed successfully.");
+        } else {
+            console.log("Popup not visible.");
+        }
+    } catch (error) {
+        console.log("Popup did not appear or there was an error:", error);
+    }
+
 }
 
 async cartModalOpen() {
@@ -231,35 +322,126 @@ async cartModalOpen() {
     
     const checkoutButton = this.page.getByRole('link', { name: 'Checkout' })
     checkoutButton.waitFor({ state: 'visible' })
+    checkoutButton.click();
+  }
+
+  async cartModalRemoval() {
+    // Open the cart panel
+    const cartPanel = this.page.locator('.flex.h-full.flex-col');
+
+    // Ensure correct item is displayed
+    await cartPanel.getByTestId('cart-item-product-info').filter({ hasText: 'Palazzo Pant' }).waitFor({ state: 'visible' });
+    await this.page.getByTestId('price-display-regular').filter({ hasText: '£59.00' }).first().waitFor({ state: 'visible' });
+
+    // Remove item
+    await this.page.getByText('Remove').click()
+
+    // Validate that item has been removed
+    const itemName = cartPanel.getByTestId('cart-item-product-info').filter({ hasText: 'Palazzo Pant' })
+    await expect(itemName).toBeHidden()
+    const emptyBasketMessage = this.page.getByTestId("empty-basket-message")
+    await expect(emptyBasketMessage).toHaveText('You have no items in your shopping bag')
+
+  }
+
+  async cartModalMultiple() {
+    // Open the cart panel
+    const cartPanel = this.page.locator('.flex.h-full.flex-col');
+
+    // Ensure correct item is displayed
+    await cartPanel.getByTestId('cart-item-product-info').filter({ hasText: 'Palazzo Pant' }).waitFor({ state: 'visible' });
+    await this.page.getByTestId('price-display-regular').filter({ hasText: '£59.00' }).first().waitFor({ state: 'visible' });
+
+    // Proceed to checkout
+    const reviewBagAndCheckoutButton = this.page.getByRole('link', { name: '£289.50 – Review Bag and' })
+    expect(reviewBagAndCheckoutButton).toHaveText(/£289.50 – Review Bag and/);
+    await reviewBagAndCheckoutButton.click();
+    
+    const summaryHeader = this.page.getByRole('heading', { name: 'Order Summary' });
+    await summaryHeader.waitFor({ state: 'visible' });
+    expect(summaryHeader).toHaveText(/Order Summary/);
+    
+    const checkoutButton = this.page.getByRole('link', { name: 'Checkout' })
     checkoutButton.waitFor({ state: 'visible' })
     checkoutButton.click();
   }
 
+
+  // validateAllPageLinks
+
   async validateAllPageLinks() {
-  // Get all the links on the page
-  const links = await this.page.$$eval('a', anchors => anchors.map(a => a.href));
-
-  for (const link of links) {
-    try {
-      // Navigate to the link
-      const [response] = await Promise.all([
-        this.page.waitForResponse(response => response.url() === link && response.status() === 200),
-        this.page.goto(link),
-      ]);
-
-      // Check if the response status is 200 (OK)
-      if (response.status() === 200) {
-        console.log(`Link works: ${link}`);
-      } else {
-        console.log(`URL does not work: ${link}`);
+    // Get all the links on the page
+    const links = await this.page.$$eval('a', anchors => anchors.map(a => a.href));
+  
+    for (const link of links) {
+      try {
+        // Skip iframe or non-interactable links
+        if (await this.isIframeLink(link)) {
+          console.log(`Skipping iframe or non-interactable link: ${link}`);
+          continue;
+        }
+  
+        // Open the link and check for the response
+        const response = await this.page.goto(link, { waitUntil: 'networkidle', timeout: 60000 });
+  
+        // Handle popups if they appear
+        await this.handlePopup();
+  
+        // Check the response status
+        if (response && response.status() === 200) {
+          console.log(`Link works: ${link}`);
+        } else if (response && response.status() === 404) {
+          console.log(`Link does not work (404): ${link}`);
+        } else if (response) {
+          console.log(`URL does not work: ${link}, Status: ${response.status()}`);
+        } else {
+          console.log(`No response received for: ${link}`);
+        }
+      } catch (error) {
+        console.log(`Error with URL: ${link}, moving to next link. Error: ${error}`);
+      } finally {
+        try {
+          // Ensure that the page has completely loaded before going back
+          await this.page.waitForTimeout(2000); // Wait a bit before going back
+          await this.page.goBack({ waitUntil: 'networkidle', timeout: 60000 });
+        } catch (goBackError) {
+          console.log(`Error going back to the main page after checking ${link}:`, goBackError);
+        }
       }
-
-      // Go back to the original page to continue testing other links
-      await this.page.goBack();
-    } catch (error) {
-      console.log(`Error with URL: ${link}, moving to next link. Error: ${error}`);
     }
-  }    
   }
-
+  
+  // Utility function to determine if a link is inside an iframe or non-interactable
+  private async isIframeLink(link: string): Promise<boolean> {
+    try {
+      // Check if the link is inside an iframe
+      const isIframe = await this.page.evaluate((link) => {
+        const anchor = document.querySelector(`a[href="${link}"]`);
+        return anchor ? !!anchor.closest('iframe') : false;
+      }, link);
+  
+      return isIframe;
+    } catch (error) {
+      console.log(`Error checking if link is iframe or non-interactable: ${link}, Error: ${error}`);
+      return false; // Default to false if there is an error
+    }
+  }
+  
+  // Handle potential popups
+  private async handlePopup() {
+    try {
+      const popupLocator = this.page.locator('.custEmailPopupBox');
+      const closeButtonLocator = popupLocator.locator('.close');
+  
+      if (await popupLocator.isVisible({ timeout: 3000 })) {
+        await closeButtonLocator.click();
+        console.log("Popup closed successfully.");
+      } else {
+        console.log("Popup not visible.");
+      }
+    } catch (popupError) {
+      console.log("Popup did not appear or there was an error:", popupError);
+    }
+  }
+         
 }

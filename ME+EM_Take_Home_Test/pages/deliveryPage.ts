@@ -18,7 +18,9 @@ export default class DeliveryPage {
     console.log('Email field is visible. Clicking...');
     await emailField.click();
 
-    await this.page.getByTestId('signInOrRegister').getByPlaceholder(' ').fill(formDetails.emailAddress);
+    // await this.page.getByTestId('signInOrRegister').getByPlaceholder(' ').fill(formDetails.emailAddress);
+    const form1 = new FormActions(page, 0); // index 0 refers to the first object
+    await form1.enterEmailDetails();
 
     // Click 'Continue to Delivery' button
     const continueButton = this.page.getByRole('button', { name: 'Continue to Delivery' });
@@ -27,24 +29,42 @@ export default class DeliveryPage {
     await continueButton.click({timeout: 20000});
 
     // Wait for the delivery form to appear by waiting for the first field
-    const requestPromise = page.waitForRequest(request =>
+    const requestPromise = this.page.waitForRequest(request =>
         request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
         );
     const request = await requestPromise;
+    // await requestPromise;
+    await request;
     console.log(request.url());
-  }
 
+    const formFields = this.page.getByTestId('deliveryAddress')
+    await formFields.isEnabled();
+    }
 
   async deliveryFormDetails(page) {    
-    const form = new FormActions(page);
-    await form.enterFormDetails()
-
+    const form1 = new FormActions(page, 0); // index 0 refers to the first object
+    await form1.enterFormDetails();
     // Wait for the delivery form to appear by waiting for the first field
-    const requestDeliveryForm = page.waitForRequest(request =>
+    const requestDeliveryForm = this.page.waitForRequest(request =>
         request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
         );
     const request = await requestDeliveryForm;
+    await requestDeliveryForm;
     console.log(request.url());
+  }
+
+  async enterInvalidFormDetails(page) {    
+    // Fill with the second object in the array
+    const form2 = new FormActions(page, 1); // index 1 refers to the second object
+    await form2.enterFormDetails();
+
+    const lastNameError = this.page.getByText('Last Name is required')
+    await expect(lastNameError).toBeVisible()
+    await expect(lastNameError).toContainText('Last Name is required')
+
+    const postalCodeError = this.page.getByText('Please enter a valid Postcode')
+    await expect(postalCodeError).toBeVisible()
+    await expect(postalCodeError).toContainText('Please enter a valid Postcode')
   }
 
   async requestBillingAddress (page) {
@@ -58,6 +78,7 @@ export default class DeliveryPage {
         request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
         );
     const request = await requestBillingAddress;
+    await request;
     console.log(request.url());
     };
 
@@ -68,10 +89,11 @@ export default class DeliveryPage {
         // Validate that the checkbox is checked
         const isChecked = await billingCheckbox.isChecked();
         await this.page.getByRole('button', { name: 'Submit to Continue' }).click()
-        const requestPaymentDetails = page.waitForRequest(request =>
+        const requestDeliveryDetails = page.waitForRequest(request =>
             request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
             );
-        const request = await requestPaymentDetails;
+        const request = await requestDeliveryDetails;
+        await request;
         console.log(request.url());
     };
 
