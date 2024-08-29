@@ -15,7 +15,6 @@ jobs:
         node-version: 18
     - name: Install dependencies
       run: npm install
-      working-directory: ./frontend  # Ensure 'frontend' is the correct subdirectory
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
       working-directory: ./frontend
