@@ -15,10 +15,13 @@ jobs:
           node-version: lts/*
       - name: Install dependencies
         run: npm install
+        working-directory: ME+EM_Take_Home_Test
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+        working-directory: ME+EM_Take_Home_Test
       - name: Run Playwright tests
         run: xvfb-run npx playwright test --grep @UI
+        working-directory: ME+EM_Take_Home_Test
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -26,3 +29,4 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
+       
