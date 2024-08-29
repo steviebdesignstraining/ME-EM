@@ -22,17 +22,20 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+      working-directory: ME+EM_Take_Home_Test
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+      working-directory: ME+EM_Take_Home_Test
 
     - name: Run Playwright tests
       run: npx playwright test
+      working-directory: ME+EM_Take_Home_Test
 
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: playwright-report
-        path: playwright-report/
+        path: ME+EM_Take_Home_Test/playwright-report/
         retention-days: 30
