@@ -15,13 +15,16 @@ jobs:
         node-version: 18
     - name: Install dependencies
       run: npm install
+      working-directory: ./subdirectory-name
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+      working-directory: ./subdirectory-name
     - name: Run Playwright tests
       run: npx playwright test
+      working-directory: ./subdirectory-name
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
-        path: playwright-report/
+        path: subdirectory-name/playwright-report/
         retention-days: 30
