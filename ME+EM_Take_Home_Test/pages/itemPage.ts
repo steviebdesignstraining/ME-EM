@@ -167,11 +167,22 @@ async itemSizeDropdown2(page) {
   
   
   
-async clickOutOfModal() {
-    const panel = this.page.locator('.flex h-full flex-col').getByTestId('cart-item-product-info').filter({ hasText: 'Palazzo Pant' })
-    await expect(panel).toBeVisible()
-    await this.page.locator('.sticky top-0 z-50').click()
-    await expect(panel).toBeHidden()
+  async clickOutOfModal() {
+    // Locate the dialog panel by its class or unique selector
+    const panel = this.page.getByRole('dialog')
+    // const reviewBagAndCheckoutButton = this.page.getByText('£59.00 – Review Bag and Checkout');
+
+
+    // Assert the dialog button is visible
+    await expect(panel).toBeVisible();
+
+    // Click outside of the dialog to close it
+    // await this.page.locator('.overlay-class-or-selector').click({ timeout: 10000 });
+    await this.page.locator('body').click({ force: true });
+    await this.page.waitForTimeout(500);  // Adjust the timeout to match your animation duration
+
+    // Assert the dialog is hidden after clicking outside
+    await expect(panel).toBeHidden({ timeout: 10000 });
 }
 
 

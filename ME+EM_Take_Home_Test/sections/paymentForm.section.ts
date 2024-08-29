@@ -20,6 +20,7 @@ export default class PaymentActions {
     // Actions
     public async enterPaymentDetails() {
         await this.page.frameLocator('iframe[name="braintree-hosted-field-number"]').getByPlaceholder('0000 0000 0000').scrollIntoViewIfNeeded();
+        await this.page.frameLocator('iframe[name="braintree-hosted-field-number"]').getByPlaceholder('0000 0000 0000').click();
         await this.cardNumber();
         await this.expirationDate();
         await this.cvv();

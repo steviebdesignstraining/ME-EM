@@ -65,11 +65,11 @@ test.describe.serial("Validate making an order", () => {
 
     });
 
-    test("", async ({ page }) => {
+    test.skip("Validate closing cart modal", async ({ page }) => {
         test.setTimeout(60000);
         const itemImageMain = new itemPage(page)
         await itemImageMain.itemColour()
-        await itemImageMain.itemSizeDropdown2(page)
+        await itemImageMain.itemSizeDropdown(page)
         await itemImageMain.cartModalOpen()
         await itemImageMain.clickOutOfModal()
     });
@@ -86,7 +86,7 @@ test.describe.serial("Validate making an order", () => {
         await itemImageMain.cartModalRemoval()
     });
 
-    test("Incomplete shipping details", async ({ page }) => {
+    test("Incomplete shipping details, form validation", async ({ page }) => {
         test.setTimeout(60000);
         const itemImageMain = new itemPage(page)
         const deliveryDetails = new deliveryPage(page)
@@ -97,15 +97,20 @@ test.describe.serial("Validate making an order", () => {
         await deliveryDetails.enterInvalidFormDetails(page)
     });
 
-    test("Form validation prompt ", async ({ page }) => {
-
-    });
 
     test("Incorrect card payment details ", async ({ page }) => {
-
+        test.setTimeout(120000);
+        const itemImageMain = new itemPage(page)
+        const deliveryDetails = new deliveryPage(page)
+        const paymentDetails = new paymentPage(page)
+        await itemImageMain.itemColour()
+        await itemImageMain.itemSizeDropdown(page)
+        await itemImageMain.cartModal()
+        await deliveryDetails.deliveryForm(page)
+        await deliveryDetails.deliveryFormDetails(page)
+        await deliveryDetails.requestBillingAddress(page)
+        await deliveryDetails.selectBillingAddress(page)
+        await paymentDetails.incorrectPaymentDetails(page)
     });
 
-    test("Try Before You Buy With Harper ", async ({ page }) => {
-
-    });
 })

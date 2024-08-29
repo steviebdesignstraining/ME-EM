@@ -15,6 +15,11 @@ async paymentDetails (page) {
     await form1.enterPaymentDetails()
 };
 
+async incorrectPaymentDetails (page) {
+    const form2 = new paymentFormActions(page, 1);
+    await form2.enterPaymentDetails()
+};
+
 async finalConfirmationOfOrder (page) {
     const confirmationOfOrderPage = page.waitForRequest(request =>
         request.url() === 'https://staging.meandem.vercel.app/checkout/order-confirmation' && request.method() === 'POST',
@@ -26,5 +31,20 @@ async finalConfirmationOfOrder (page) {
     await expect(confirmationHeader).toContainText('Thank you for your purchase.')
 
 };
+
+async erroralert () {
+    const invalidCardNum = this.page.getByText('Enter a valid card number')
+    await expect(invalidCardNum).toBeVisible()
+    await expect(invalidCardNum).toContainText('Enter a valid Expiry date')
+
+    const invalidExpDate = await this.page.getByText('Enter a valid Expiry date')
+    await expect(invalidExpDate).toBeVisible()
+    await expect(invalidExpDate).toContainText('Enter a valid Expiry date')
+
+    const invalidPostcode = this.page.getByText('Invalid postcode')
+    await expect(invalidPostcode).toBeVisible()
+    await expect(invalidPostcode).toContainText('Invalid postcode')
+
+}
 
 };
