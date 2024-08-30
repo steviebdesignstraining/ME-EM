@@ -26,37 +26,4 @@ jobs:
         if: always()
         with:
           name: playwright-report-ui
-          path: playwright-report/
-      - name: Playwright issue creator
-          # You may pin to the exact commit or the version.
-          # uses: estruyf/playwright-github-issue-creator@a07daec2b4e2d7cacf99ea04cf070ce58c358fff
-          uses: estruyf/playwright-github-issue-creator@v1.3.0
-          with:
-            # The GitHub token to create the issues.
-            github-token: # optional, default is ${{ github.token }}
-            # The path to the Playwright report file.
-            report-path: 
-            # The prefix for the issue title.
-            issue-prefix: # optional
-            # The labels to add to the issue (comma-separated).
-            issue-labels: # optional
-            # The footer to add to the issue.
-            issue-footer: # optional, default is > This issue was created by the Playwright issue creator action.
-            # The assignees to add to the issue (comma-separated).
-            issue-assignees: # optional
-            # Add the project label to the issue.
-            add-project-label: # optional
-            # Add a comment to the issue if the issue already exists.
-            add-comment: # optional
-            # Close the issue when the next test run is successful.
-            close-on-success: # optional
-            # The message to add when closing the issue.
-            close-on-success-msg: # optional, default is This issue was automatically closed after the test passed.
-            # Add the issue information to the job summary.
-            job-summary: # optional
-            # Do not log the issue creation.
-            quite: # optional
-                  
-                  retention-days: 30
-        
-               
+          path: playwright-report
