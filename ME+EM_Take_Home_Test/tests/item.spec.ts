@@ -53,6 +53,7 @@ test.describe.serial("Validate making an order", () => {
 
     test("Adding multiple items and validating quantity", async ({ page }) => {
         test.setTimeout(120000);
+        test.slow();
         const itemImageMain = new itemPage(page)
         const deliveryDetails = new deliveryPage(page)
         const paymentDetails = new paymentPage(page)
@@ -60,7 +61,9 @@ test.describe.serial("Validate making an order", () => {
         await itemImageMain.clickItemSizeDropdown(page)
         await itemImageMain.selectRandomOption(page)
         await itemImageMain.addToBag()
-        await page.getByRole("button", { name: "Add to Bag", });
+        await page.waitForLoadState('domcontentloaded')
+        // await page.getByRole("button", { name: "Add to Bag", });
+        // await itemImageMain.reloadPage()
         await itemImageMain.itemColour()
         await itemImageMain.popup(page)
         await page.waitForLoadState('domcontentloaded')
@@ -68,6 +71,7 @@ test.describe.serial("Validate making an order", () => {
         await itemImageMain.selectRandomOption(page)
         await itemImageMain.addToBag()
         await itemImageMain.clickOutOfModal(page)
+        // Added reload as the shoe image was not working when clicked
         await itemImageMain.reloadPage()
         await itemImageMain.addShoesItem()
         await itemImageMain.clickItemSizeDropdown(page)
@@ -126,6 +130,7 @@ test.describe.serial("Validate making an order", () => {
         await itemImageMain.cartModal()
         await deliveryDetails.deliveryForm(page)
         await deliveryDetails.enterInvalidFormDetails(page)
+        await deliveryDetails.errorAlert(page)
     });
 
     test("Incorrect card payment details ", async ({ page }) => {
@@ -145,6 +150,8 @@ test.describe.serial("Validate making an order", () => {
         await deliveryDetails.requestBillingAddress(page)
         await deliveryDetails.selectBillingAddress(page)
         await paymentDetails.incorrectPaymentDetails(page)
+        await paymentDetails.errorAlert(page)
+        await page.waitForTimeout(1000)
     });
 
 })

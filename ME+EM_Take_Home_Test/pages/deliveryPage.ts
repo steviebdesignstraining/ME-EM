@@ -1,8 +1,6 @@
 import { Page, expect } from "@playwright/test";
 import FormActions from "../sections/deliveryFormActions.section";
-import testData from "../testData/deliveryAddress.json";
-
-const formDetails = JSON.parse(JSON.stringify(testData[0])); //  // Use the first object in the array
+import validationPrompt from "../sections/errorPrompt.section";
 const eventToWaitFor = {
   type: 6,
   ts: 126234,
@@ -98,13 +96,13 @@ export default class DeliveryPage {
     const form2 = new FormActions(page, 1); // index 1 refers to the second object
     await form2.enterFormDetails();
 
-    const lastNameError = this.page.getByText('Last Name is required')
-    await expect(lastNameError).toBeVisible()
-    await expect(lastNameError).toContainText('Last Name is required')
+    // const lastNameError = this.page.getByText('Last Name is required')
+    // await expect(lastNameError).toBeVisible()
+    // await expect(lastNameError).toContainText('Last Name is required')
 
-    const postalCodeError = this.page.getByText('Please enter a valid Postcode')
-    await expect(postalCodeError).toBeVisible()
-    await expect(postalCodeError).toContainText('Please enter a valid Postcode')
+    // const postalCodeError = this.page.getByText('Please enter a valid Postcode')
+    // await expect(postalCodeError).toBeVisible()
+    // await expect(postalCodeError).toContainText('Please enter a valid Postcode')
   }
 
   async requestBillingAddress (page) {
@@ -175,4 +173,10 @@ export default class DeliveryPage {
         });
       });
     }
+
+    async errorAlert (page) {
+      const promt = new validationPrompt(page, 0); // index 1 refers to the second object
+      await promt.validatePromptMessage();
+    }
+  
   }

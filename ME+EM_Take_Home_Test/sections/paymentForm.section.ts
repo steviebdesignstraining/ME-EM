@@ -1,6 +1,7 @@
 import { Page } from "@playwright/test";
 import testData from "../testData/paymentDetails.json";
 
+
 export default class PaymentActions {
     page: Page;
     paymentDetails: any;

@@ -36,9 +36,21 @@ export default class ItemsPage {
     await this.page.locator(".w-\\[100\\%\\]").first().click();
   }
 
+  async itemColourRequest(page) {
+    const colourRequest = page.waitForRequest(
+      (request) =>
+        request.url() ===
+          "https://browser-intake-datadoghq.eu/api/v2/rum?ddsource=browser&ddtags=sdk_version%3A5.26.0%2Capi%3Afetch%2Cenv%3Astaging%2Cservice%3Anextjs-frontend-web%2Cversion%3A1.0.0&dd-api-key=pubaccb01427085fbf077f3bb54730fe4f3&dd-evp-origin-version=5.26.0&dd-evp-origin=browser&dd-request-id=96f09020-409d-40ba-816d-32925a691748&batch_time=1726072781038" &&
+        request.method() === "POST"
+    );
+    await colourRequest;
+    await expect(page).toHaveURL(/order-confirmation/);
+  }
+
   async itemColour() {
     const DarkNavy = this.page.getByLabel("Dark Navy");
     await DarkNavy.waitFor({ state: "visible" });
+    // await this.itemColourRequest
     await DarkNavy.click({ timeout: 10000 });
     // const confirmationOfItemCol = this.page.waitForRequest(request =>
     //     request.url() === 'https://browser-intake-datadoghq.eu/api/v2/rum?ddsource=browser&ddtags=sdk_version%3A5.23.3%2Capi%3Afetch%2Cenv%3Astaging%2Cservice%3Anextjs-frontend-web%2Cversion%3A1.0.0&dd-api-key=pubaccb01427085fbf077f3bb54730fe4f3&dd-evp-origin-version=5.23.3&dd-evp-origin=browser&dd-request-id=35a9f064-2f5e-4aa9-a6d1-8b848228a022&batch_time=1724789588738' && request.method() === 'POST',
@@ -88,16 +100,18 @@ export default class ItemsPage {
     }
 
     // Select a random enabled option
-    const randomOptionKey = enabledOptions[Math.floor(Math.random() * enabledOptions.length)];
+    const randomOptionKey =
+      enabledOptions[Math.floor(Math.random() * enabledOptions.length)];
 
     // Click the random option
     await page.click(`[data-key="${randomOptionKey}"]`);
-}
-
+  }
 
   async popup(page) {
-    await this.page.locator("div.custEmailPopupBox").waitFor({ state: "visible" });
-      await this.page.locator("div.close").click({timeout: 10000})
+    await this.page
+      .locator("div.custEmailPopupBox")
+      .waitFor({ state: "visible" });
+    await this.page.locator("div.close").click({ timeout: 10000 });
   }
 
   async addToBag() {
@@ -323,55 +337,25 @@ export default class ItemsPage {
     // Ensure the element is visible
     await shoe.waitFor({ state: "visible", timeout: 30000 }); // Wait up to 30 seconds for visibility
 
-    await shoe.first().click({force: true})
+    await shoe.first().click({ force: true });
 
-    await this.page.waitForTimeout(20000)
+    // await this.page.locator("html").evaluate(node => {
+    //   node.style.pointerEvents = "none";
+    // });
 
-    // // Log any bounding box or potential issues
-    // const boundingBox = await shoe.boundingBox();
-    // console.log("Bounding box of shoe:", boundingBox);
-
-    // // Using alternative locators for the shoe title link
-    // const shoeTitleLink = this.page.getByLabel('Flannel Slip-On Trainer')
-    //   // .locator("a")
-    //   // .filter({ hasText: "Flannel Slip-On Trainer" });
-    // await shoeTitleLink.waitFor({ state: "visible", timeout: 10000 });
-    // for (let i = 0; i < 3; i++) {
-    //   try {
-    //     await shoeTitleLink.click({ timeout: 30000 });
-    //     break; // Break the loop if click is successful
-    //   } catch (error) {
-    //     console.log(`Attempt ${i + 1} failed. Retrying...`);
-    //     await this.page.waitForTimeout(1000); // Wait for 1 second before retrying
-    //   }
+    // const boundingBox = await shoe.first().boundingBox();
+    // if (boundingBox) {
+    //   await shoe.first().click({ force: true });
+    // } else {
+    //   console.log("Element is obstructed or off-screen.");
     // }
 
-    // const shoePageTitle = this.page.getByTestId(
-    //   "product-detail-block-product-title"
-    // );
-    // await shoePageTitle.waitFor({ state: "visible", timeout: 10000 });
-    // await expect(shoePageTitle).toHaveText("Flannel Slip-On Trainer");
-
-    // // Click the shoe size button
-    // const sizeDropDown = this.page.getByTestId("size-select-button-dropdown");
-    // await sizeDropDown.waitFor({ state: "visible", timeout: 10000 }); // Ensure size button is visible
-    // await sizeDropDown.click({ timeout: 5000 }); // Attempt to click size button
-
-    // // Wait for the dropdown to be visible
-    // const dropdownList = this.page.getByRole("option");
-    // await dropdownList
-    //   .filter({ hasText: "39 (UK 6)" })
-    //   .waitFor({ state: "visible" });
-
-    // // Select size
-    // await dropdownList.filter({ hasText: "39 (UK 6)" }).click();
-
-    // // Click Add to bag
-    // const addToBagButton = this.page.getByRole("button", {
-    //   name: "Add to Bag",
+    // // Reset pointer events after the click
+    // await this.page.locator("html").evaluate(node => {
+    //   node.style.pointerEvents = "";
     // });
-    // await addToBagButton.waitFor({ state: "visible" });
-    // await addToBagButton.click();
+
+    await this.page.waitForTimeout(20000);
   }
 
   async cartModalOpen() {
@@ -450,11 +434,13 @@ export default class ItemsPage {
     // Ensure correct item is displayed
     await cartPanel
       .getByTestId("cart-item-product-info")
-      .filter({ hasText: "Palazzo Pant" }).last()
+      .filter({ hasText: "Palazzo Pant" })
+      .last()
       .waitFor({ state: "visible" });
     await this.page
       .getByTestId("price-display-regular")
-      .filter({ hasText: "£59.00" }).last()
+      .filter({ hasText: "£59.00" })
+      .last()
       .first()
       .waitFor({ state: "visible" });
 
@@ -467,7 +453,7 @@ export default class ItemsPage {
     const summaryHeader = this.page.getByRole("heading", {
       name: "Order Summary",
     });
-    await this.page.waitForLoadState('load', {timeout: 10000})
+    await this.page.waitForLoadState("load", { timeout: 10000 });
     await summaryHeader.waitFor({ state: "visible" });
     expect(summaryHeader).toHaveText(/Order Summary/);
 

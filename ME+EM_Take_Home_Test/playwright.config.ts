@@ -1,13 +1,12 @@
-import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
+import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
 
 // dotenv.config({ path: path.resolve(__dirname, './env/.env') });
 
 // dotenv.config({
 //   path:'./env/.env.${process.env.env.ENV}',
 // })
-dotenv.config({ path: './env/.env' });
-
+dotenv.config({ path: "./env/.env" });
 
 // dotenv.config();
 
@@ -23,8 +22,8 @@ dotenv.config({ path: './env/.env' });
  */
 export default defineConfig({
   timeout: 60000,
-  globalSetup: 'utils/globalSetup.ts',
-  testDir: './tests',
+  globalSetup: "utils/globalSetup.ts",
+  testDir: "./tests",
   retries: 3,
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -35,7 +34,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL: process.env.URL,
@@ -43,24 +42,29 @@ export default defineConfig({
     // baseURL: 'process.env.env.ENV',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: "on-first-retry",
+    // capture screenshot after each test failure
+    screenshot: "only-on-failure",
+
+    // record video only when retrying a test for the first time
+    video: "on-first-retry",
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
 
     {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
     },
 
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
     },
 
     /* Test against mobile viewports. */
