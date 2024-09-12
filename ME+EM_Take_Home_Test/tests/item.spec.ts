@@ -11,12 +11,12 @@ let page: Page;
 //     console.log(process.env.URL);
 // })
 test.describe.serial("Validate making an order", () => {
-// test.describe.configure({ retries: 2 });
+test.describe.configure({ retries: 2 });
   test.beforeEach(async ({ page }) => {
     const url = process.env.URL as string;
     await page.goto(url);
      const itemImageMain = new itemPage(page);
-    // await page.route('**/iframe-url-or-pattern/**', route => route.abort());
+    await page.route('**/iframe-url-or-pattern/**', route => route.abort());
     await itemImageMain.popupCookies();
     });
 
@@ -37,6 +37,7 @@ test.describe.serial("Validate making an order", () => {
         await itemImageMain.clickItemSizeDropdown(page)
         await itemImageMain.selectRandomOption(page)
         await itemImageMain.addToBag()
+        await itemImageMain.getCartItemCount()
         await itemImageMain.cartModal()
         await deliveryDetails.deliveryForm2(page)
         await deliveryDetails.deliveryFormDetails(page)
@@ -65,8 +66,8 @@ test.describe.serial("Validate making an order", () => {
         // await page.getByRole("button", { name: "Add to Bag", });
         // await itemImageMain.reloadPage()
         await itemImageMain.itemColour()
-        await itemImageMain.popup(page)
         await page.waitForLoadState('domcontentloaded')
+        await itemImageMain.popup(page)
         await itemImageMain.clickItemSizeDropdown(page)
         await itemImageMain.selectRandomOption(page)
         await itemImageMain.addToBag()
@@ -77,6 +78,7 @@ test.describe.serial("Validate making an order", () => {
         await itemImageMain.clickItemSizeDropdown(page)
         await itemImageMain.selectRandomOption(page)
         await itemImageMain.addToBag()
+        await itemImageMain.getCartItemCount()
         await itemImageMain.cartModal3()
         await deliveryDetails.deliveryForm2(page)
         await deliveryDetails.deliveryFormDetails(page)
@@ -102,10 +104,6 @@ test.describe.serial("Validate making an order", () => {
 
     test("Validate removing an item(s) ", async ({ page }) => {
         test.setTimeout(60000);
-        await page.evaluate(() => {
-            const iframes = document.querySelectorAll('iframe');
-            iframes.forEach(iframe => iframe.remove()); // Remove all iframes
-        });
         const itemImageMain = new itemPage(page)
         await itemImageMain.itemColour()
         await itemImageMain.clickItemSizeDropdown(page)
@@ -113,6 +111,7 @@ test.describe.serial("Validate making an order", () => {
         await itemImageMain.clickItemSizeDropdown(page)
         await itemImageMain.selectRandomOption(page)
         await itemImageMain.addToBag()
+        await itemImageMain.getCartItemCount()
         await itemImageMain.cartModal2()
         await itemImageMain.itemRemoval()
     });

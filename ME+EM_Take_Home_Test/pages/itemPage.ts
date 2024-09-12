@@ -1,28 +1,15 @@
-import { Page, expect } from "@playwright/test";
-import FormActions from "../sections/deliveryFormActions.section";
-import testData from "../testData/deliveryAddress.json";
+import { Page, expect, Locator } from "@playwright/test";
+
 
 // const formDetails = JSON.parse(JSON.stringify(testData[0])); //  // Use the first object in the array
 
 export default class ItemsPage {
+  cartIcon: Locator;
   constructor(public page: Page) {
     this.page = page;
+    this.cartIcon = page.getByLabel('cart');
   }
 
-  async handleIframes(page) {
-    // Detect iframes and handle them
-    const iframes = await page.$$("iframe");
-    if (iframes.length > 0) {
-      console.log(`Found ${iframes.length} iframes.`);
-      for (const iframe of iframes) {
-        const frame = await iframe.contentFrame();
-        if (frame) {
-          // Perform actions inside the iframe if needed
-          // Example: close or log something within the iframe
-        }
-      }
-    }
-  }
 
   async popupCookies() {
     const iframeButton = this.page
@@ -143,112 +130,6 @@ export default class ItemsPage {
     }
   }
 
-  async itemSizeDropdown(page) {
-    // Click dropdown
-    await this.page.getByTestId("size-select-button-dropdown").click();
-
-    // Close popup that appears
-    try {
-      // Attempt to locate the popup using its class
-      const popupLocator = page.locator(".custEmailPopupBox");
-      const closeButtonLocator = popupLocator.locator(".close");
-
-      // Check if the popup is visible
-      if (await popupLocator.isVisible({ timeout: 3000 })) {
-        // If visible, click the close button
-        await closeButtonLocator.click();
-        console.log("Popup closed successfully.");
-      } else {
-        console.log("Popup not visible.");
-      }
-    } catch (error) {
-      console.log("Popup did not appear or there was an error:", error);
-    }
-
-    // Click dropdown
-    await this.page.getByTestId("size-select-button-dropdown").click();
-
-    // Wait for the dropdown to be visible
-    const dropdownList = this.page.getByRole("option");
-    await dropdownList
-      .filter({ hasText: "UK 10" })
-      .waitFor({ state: "visible" });
-
-    // Select size
-    await dropdownList.filter({ hasText: "UK 10" }).click();
-
-    // Add to Bag
-    const addToBagButton = this.page.getByRole("button", {
-      name: "Add to Bag",
-    });
-    await addToBagButton.waitFor({ state: "visible" });
-    await addToBagButton.click();
-    // Call handleIframes in your test where needed
-    await this.handleIframes(page);
-
-    // Wait until cart count updates to 1
-    const cartLocator = this.page.getByLabel("Cart", { exact: true });
-    await cartLocator.getByText("1").waitFor({ state: "visible" });
-    await expect(cartLocator).toHaveText("1", { timeout: 3000 });
-  }
-
-  async itemSizeDropdown2(page) {
-    try {
-      // Disable iframes by removing them
-      await page.evaluate(() => {
-        const iframes = document.querySelectorAll("iframe");
-        iframes.forEach((iframe) => iframe.remove());
-      });
-
-      // Click dropdown
-      await this.page.getByTestId("size-select-button-dropdown").click();
-
-      // Wait for the dropdown to be visible
-      const dropdownList = this.page.getByRole("option");
-      await dropdownList
-        .filter({ hasText: "UK 10" })
-        .waitFor({ state: "visible" });
-
-      await this.handleIframes(page);
-
-      // Select size
-      await dropdownList.filter({ hasText: "UK 10" }).click();
-
-      await this.handleIframes(page);
-
-      // Add to Bag
-      const addToBagButton = this.page.getByRole("button", {
-        name: "Add to Bag",
-      });
-      await addToBagButton.waitFor({ state: "visible", timeout: 120000 });
-      await addToBagButton.click();
-
-      // Handle popup
-      await this.handlePopup2();
-    } catch (error) {
-      console.error("Error in itemSizeDropdown2 function:", error);
-      throw error;
-    }
-  }
-
-  private async handlePopup2() {
-    try {
-      const popupLocator = this.page.locator(".custEmailPopupBox");
-      const closeButtonLocator = popupLocator.locator(".close");
-
-      // Wait for popup to be visible and attempt to close it
-      await popupLocator.waitFor({ state: "visible", timeout: 3000 });
-      if (await popupLocator.isVisible()) {
-        await closeButtonLocator.click();
-        console.log("Popup closed successfully.");
-      } else {
-        console.log("Popup not visible.");
-      }
-    } catch (error) {
-      console.log("Popup did not appear or there was an error:", error);
-    }
-  }
-
   async clickOutOfModal(page: Page) {
     // Locate the dialog panel by its class or unique selector
     const panel = this.page.getByRole("dialog");
@@ -268,50 +149,9 @@ export default class ItemsPage {
     });
   }
 
-  async addMultipleItems(page) {
-    // Click dropdown
-    await this.page.getByTestId("size-select-button-dropdown").click();
-
-    // Wait for the dropdown to be visible
-    const dropdownList = this.page.getByRole("option");
-    await dropdownList
-      .filter({ hasText: "UK 10" })
-      .waitFor({ state: "visible" });
-
-    // Select size
-    await dropdownList.filter({ hasText: "UK 10" }).click();
-
-    // Add to Bag
-    const addToBagButton = this.page.getByRole("button", {
-      name: "Add to Bag",
-    });
-    await addToBagButton.waitFor({ state: "visible" });
-    await addToBagButton.click();
-  }
-
-  async addItemswithSizeSelected(page) {
-    await this.page.getByTestId("size-select-button-dropdown").click();
-
-    // Wait for the dropdown to be visible
-    const dropdownList = this.page.getByRole("option", { name: "UK 10" });
-    await dropdownList
-      .filter({ hasText: "UK 10" })
-      .waitFor({ state: "visible" });
-    await dropdownList.click();
-    // Add to Bag
-    const addToBagButton = this.page.getByRole("button", {
-      name: "Add to Bag",
-    });
-    await this.page.waitForTimeout(1000); // Wait for 1 second before retrying
-    for (let i = 0; i < 3; i++) {
-      try {
-        await addToBagButton.click({ timeout: 10000 });
-        break; // Break the loop if click is successful
-      } catch (error) {
-        console.log(`Attempt ${i + 1} failed. Retrying...`);
-        await this.page.waitForTimeout(1000); // Wait for 1 second before retrying
-      }
-    }
+  async getCartItemCount(): Promise<number> {
+    const textContent = await this.cartIcon.textContent();
+    return parseInt(textContent || '0'); // Default to '0' if textContent is null
   }
 
   async verifyOneItem(page) {
@@ -490,41 +330,6 @@ export default class ItemsPage {
       "You have no items in your shopping bag"
     );
   }
-
-  async cartModalMultiple() {
-    // Open the cart panel
-    const cartPanel = this.page.locator(".flex.h-full.flex-col");
-
-    // Ensure correct item is displayed
-    await cartPanel
-      .getByTestId("cart-item-product-info")
-      .filter({ hasText: "Palazzo Pant" })
-      .waitFor({ state: "visible" });
-    await this.page
-      .getByTestId("price-display-regular")
-      .filter({ hasText: "£59.00" })
-      .first()
-      .waitFor({ state: "visible" });
-
-    // Proceed to checkout
-    const reviewBagAndCheckoutButton = this.page.getByRole("link", {
-      name: "£289.50 – Review Bag and",
-    });
-    expect(reviewBagAndCheckoutButton).toHaveText(/£289.50 – Review Bag and/);
-    await reviewBagAndCheckoutButton.click();
-
-    const summaryHeader = this.page.getByRole("heading", {
-      name: "Order Summary",
-    });
-    await summaryHeader.waitFor({ state: "visible" });
-    expect(summaryHeader).toHaveText(/Order Summary/);
-
-    const checkoutButton = this.page.getByRole("link", { name: "Checkout" });
-    checkoutButton.waitFor({ state: "visible" });
-    checkoutButton.click();
-  }
-
-  // validateAllPageLinks
 
   async validateAllPageLinks() {
     // Get all the links on the page
