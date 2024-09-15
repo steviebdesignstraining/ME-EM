@@ -10,19 +10,19 @@ export default class PaymentPage {
     this.page = page;
   }
 
-  async paymentDetails(page) {
+  async paymentDetails(page: Page) {
     const form1 = new paymentFormActions(page, 0);
     await form1.enterPaymentDetails();
   }
 
-  async incorrectPaymentDetails(page) {
+  async incorrectPaymentDetails(page: Page) {
     const form2 = new paymentFormActions(page, 1);
     await form2.enterPaymentDetails();
   }
 
-  async finalConfirmationOfOrder(page) {
+  async finalConfirmationOfOrder(page: Page) {
     const confirmationOfOrderPage = page.waitForRequest(
-      (request) =>
+      (request: { url: () => string; method: () => string; }) =>
         request.url() ===
           "https://staging.meandem.vercel.app/checkout/order-confirmation" &&
         request.method() === "POST"
@@ -38,7 +38,7 @@ export default class PaymentPage {
     );
   }
 
-  async errorAlert (page) {
+  async errorAlert (page: Page) {
     const promt = new validationPrompt(page, 1); // index 1 refers to the second object
     await promt.paymentPromptMessage();
   }

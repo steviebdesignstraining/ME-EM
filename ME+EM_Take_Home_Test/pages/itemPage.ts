@@ -1,4 +1,5 @@
 import { Page, expect, Locator } from "@playwright/test";
+import { url } from "inspector";
 
 
 // const formDetails = JSON.parse(JSON.stringify(testData[0])); //  // Use the first object in the array
@@ -23,15 +24,15 @@ export default class ItemsPage {
     await this.page.locator(".w-\\[100\\%\\]").first().click();
   }
 
-  async itemColourRequest(page) {
+  async itemColourRequest(page: { waitForRequest: (arg0: (request: any) => boolean) => any; }) {
     const colourRequest = page.waitForRequest(
-      (request) =>
+      (request: { url: () => string; method: () => string; }) =>
         request.url() ===
           "https://browser-intake-datadoghq.eu/api/v2/rum?ddsource=browser&ddtags=sdk_version%3A5.26.0%2Capi%3Afetch%2Cenv%3Astaging%2Cservice%3Anextjs-frontend-web%2Cversion%3A1.0.0&dd-api-key=pubaccb01427085fbf077f3bb54730fe4f3&dd-evp-origin-version=5.26.0&dd-evp-origin=browser&dd-request-id=96f09020-409d-40ba-816d-32925a691748&batch_time=1726072781038" &&
         request.method() === "POST"
     );
     await colourRequest;
-    await expect(page).toHaveURL(/order-confirmation/);
+    await expect(url).toContain('order-confirmation');
   }
 
   async itemColour() {
@@ -62,7 +63,7 @@ export default class ItemsPage {
     await this.page.reload();
   }
 
-  async clickItemSizeDropdown(page) {
+  async clickItemSizeDropdown(page: Page) {
     // Click dropdown
     await this.page.getByTestId("size-select-button-dropdown").click();
   }
@@ -94,7 +95,7 @@ export default class ItemsPage {
     await page.click(`[data-key="${randomOptionKey}"]`);
   }
 
-  async popup(page) {
+  async popup(page: Page) {
     await this.page
       .locator("div.custEmailPopupBox")
       .waitFor({ state: "visible" });
@@ -110,7 +111,7 @@ export default class ItemsPage {
     await addToBagButton.click();
   }
 
-  async closePopup(page) {
+  async closePopup(page: { locator: (arg0: string) => any; }) {
     // Close popup that appears
     try {
       // Attempt to locate the popup using its class
@@ -154,14 +155,14 @@ export default class ItemsPage {
     return parseInt(textContent || '0'); // Default to '0' if textContent is null
   }
 
-  async verifyOneItem(page) {
+  async verifyOneItem(page: any) {
     // Wait until cart count updates to 1
     const cartLocator = this.page.getByLabel("Cart", { exact: true });
     await cartLocator.getByText("1").waitFor({ state: "visible" });
     await expect(cartLocator).toHaveText("1", { timeout: 3000 });
   }
 
-  async verifyFourItem(page) {
+  async verifyFourItem(page: any) {
     // Wait until cart count updates to 1
     const cartLocator = this.page.getByLabel("Cart", { exact: true });
     await cartLocator.getByText("4").waitFor({ state: "visible" });

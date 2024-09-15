@@ -1,6 +1,20 @@
 import { Page, expect } from "@playwright/test";
 import FormActions from "../sections/deliveryFormActions.section";
 import validationPrompt from "../sections/errorPrompt.section";
+
+type CustomEventDetail = {
+  type: number;
+  ts: number;
+  x: number;
+  y: number;
+  tgt: string;
+};
+
+type CustomEventToWaitFor = {
+  type: number;
+  tgt: string;
+};
+
 const eventToWaitFor = {
   type: 6,
   ts: 126234,
@@ -14,17 +28,21 @@ export default class DeliveryPage {
     this.page = page;
   }
 
-  async deliveryForm(page) {
+  async deliveryForm(page: Page) {
+    console.log('Starting the delivery form process...');
+
     // Wait for and interact with the email field
-    await this.page.getByRole('button', { name: 'Continue as guest' }).click()
+    await this.page.getByRole('button', { name: 'Continue as guest' }).click();
+    console.log('Clicked "Continue as guest" button.');
+
     const emailField = this.page.getByTestId('signInOrRegister').getByPlaceholder(' ');
     await emailField.waitFor({ state: 'visible', timeout: 10000 });
     console.log('Email field is visible. Clicking...');
     await emailField.click();
 
-    // await this.page.getByTestId('signInOrRegister').getByPlaceholder(' ').fill(formDetails.emailAddress);
     const form1 = new FormActions(page, 0); // index 0 refers to the first object
     await form1.enterEmailDetails();
+    console.log('Entered email details.');
 
     // Click 'Continue to Delivery' button
     const continueButton = this.page.getByRole('button', { name: 'Continue to Delivery' });
@@ -33,150 +51,127 @@ export default class DeliveryPage {
     await continueButton.click({timeout: 20000});
 
     // Wait for the delivery form to appear by waiting for the first field
+    console.log('Waiting for the delivery request to complete...');
     const requestPromise = this.page.waitForRequest(request =>
         request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
         );
     const request = await requestPromise;
-    // await requestPromise;
-    await request;
-    console.log(request.url());
+    console.log('Request URL:', request.url());
 
-    const formFields = this.page.getByTestId('deliveryAddress')
+    const formFields = this.page.getByTestId('deliveryAddress');
     await formFields.isEnabled();
-    }
+    console.log('Delivery form is enabled.');
+  }
 
-    async deliveryForm2(page) {
-      // Wait for and interact with the email field
-      await this.page.getByRole('button', { name: 'Continue as guest' }).click()
-      const emailField = this.page.getByTestId('signInOrRegister').getByPlaceholder(' ');
-      await emailField.waitFor({ state: 'visible', timeout: 10000 });
-      console.log('Email field is visible. Clicking...');
-      await emailField.click();
-  
-      // await this.page.getByTestId('signInOrRegister').getByPlaceholder(' ').fill(formDetails.emailAddress);
-      const form1 = new FormActions(page, 0); // index 0 refers to the first object
-      await form1.enterEmailDetails();
-  
-      // Click 'Continue to Delivery' button
-      const continueButton = this.page.getByRole('button', { name: 'Continue to Delivery' });
-      await continueButton.waitFor({ state: 'visible', timeout: 20000 });
-      console.log('"Continue to Delivery" button is visible. Clicking...');
-      await continueButton.click({timeout: 20000});
+  async deliveryForm2(page: Page) {
+    console.log('Starting the delivery form process (second flow)...');
 
-      // await this.waitForCustomEvent(page)
-  
-      // Wait for the delivery form to appear by waiting for the first field
-      // const requestPromise = this.page.waitForRequest(request =>
-      //     request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
-      //     );
-      // const request = await requestPromise;
-      // await requestPromise;
-      // console.log(request.url())
-      await this.page.waitForLoadState('load');
-      // console.log(formRequest.url());
-      }
+    // Wait for and interact with the email field
+    await this.page.getByRole('button', { name: 'Continue as guest' }).click();
+    console.log('Clicked "Continue as guest" button.');
 
-  async deliveryFormDetails(page) {     
-    // const formFields = this.page.getByTestId('deliveryAddress')
-    // await expect(formFields.locator('#:r89:-input-Delivery-firstName')).toBeEnabled();
-    await expect(this.page.getByLabel('First Name*')).toBeEnabled
+    const emailField = this.page.getByTestId('signInOrRegister').getByPlaceholder(' ');
+    await emailField.waitFor({ state: 'visible', timeout: 10000 });
+    console.log('Email field is visible. Clicking...');
+    await emailField.click();
+
+    const form1 = new FormActions(page, 0); // index 0 refers to the first object
+    await form1.enterEmailDetails();
+    console.log('Entered email details.');
+
+    // Click 'Continue to Delivery' button
+    const continueButton = this.page.getByRole('button', { name: 'Continue to Delivery' });
+    await continueButton.waitFor({ state: 'visible', timeout: 20000 });
+    console.log('"Continue to Delivery" button is visible. Clicking...');
+    await continueButton.click({timeout: 20000});
+
+    await this.page.waitForLoadState('load');
+    console.log('Page fully loaded after clicking "Continue to Delivery".');
+  }
+
+  async deliveryFormDetails(page: Page) {
+    console.log('Starting the form details entry process...');
+
+    await expect(this.page.getByLabel('First Name*')).toBeEnabled();
+    console.log('First Name field is enabled.');
+
     const form1 = new FormActions(page, 0); // index 0 refers to the first object
     await form1.enterFormDetails();
+    console.log('Entered delivery form details.');
+
     // Wait for the delivery form to appear by waiting for the first field
     const requestDeliveryForm = this.page.waitForRequest(request =>
         request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
-        );
+    );
     const request = await requestDeliveryForm;
-    await requestDeliveryForm;
-    console.log(request.url());
+    console.log('Request URL for delivery form details:', request.url());
   }
 
-  async enterInvalidFormDetails(page) {    
+  async enterInvalidFormDetails(page: Page) {
+    console.log('Entering invalid form details...');
+
     // Fill with the second object in the array
     const form2 = new FormActions(page, 1); // index 1 refers to the second object
     await form2.enterFormDetails();
-
-    // const lastNameError = this.page.getByText('Last Name is required')
-    // await expect(lastNameError).toBeVisible()
-    // await expect(lastNameError).toContainText('Last Name is required')
-
-    // const postalCodeError = this.page.getByText('Please enter a valid Postcode')
-    // await expect(postalCodeError).toBeVisible()
-    // await expect(postalCodeError).toContainText('Please enter a valid Postcode')
+    console.log('Entered invalid form details.');
   }
 
-  async requestBillingAddress (page) {
-    // Locate the radio button or checkbox using its ID, aria-label, or another attribute
+  async requestBillingAddress(page: Page) {
+    console.log('Requesting billing address...');
+
     const billingCheckbox = page.locator('#billingAddressUsePrePopulated');
-
-    // Validate that the checkbox is checked
     const isChecked = await billingCheckbox.isChecked();
-    await this.page.getByRole('button', { name: 'Submit to Continue' }).click()
-    const requestBillingAddress = page.waitForRequest(request =>
+    console.log('Billing checkbox is checked:', isChecked);
+
+    await this.page.getByRole('button', { name: 'Submit to Continue' }).click();
+    console.log('Clicked "Submit to Continue".');
+
+    const requestBillingAddress = page.waitForRequest((request) =>
         request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
-        );
+    );
     const request = await requestBillingAddress;
-    await request;
-    console.log(request.url());
-    };
-
-    async requestDeliveryMethod (page) {
-        // Locate the radio button or checkbox using its ID, aria-label, or another attribute
-        const billingCheckbox = page.locator('#rm_rmt48__2');
-    
-        // Validate that the checkbox is checked
-        const isChecked = await billingCheckbox.isChecked();
-        await this.page.getByRole('button', { name: 'Submit to Continue' }).click()
-        const requestDeliveryDetails = page.waitForRequest(request =>
-            request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
-            );
-        const request = await requestDeliveryDetails;
-        await request;
-        console.log(request.url());
-    };
-
-    async selectBillingAddress (page) {
-        // Locate the radio button or checkbox using its ID, aria-label, or another attribute
-        const royalMail = page.locator('#rm_rmt48__2');
-    
-        // Validate that the checkbox is checked
-        const isChecked = await royalMail.isChecked();
-        await this.page.getByRole('button', { name: 'Submit to Continue' }).click()
-        const requestPaymentDetails = page.waitForRequest(request =>
-            request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
-            );
-        const request = await requestPaymentDetails;
-        console.log(request.url());
-    };
-
-    async waitForCustomEvent(page) {
-      // Expose a function to handle the custom event
-      await page.exposeFunction('onCustomEvent', (event) => {
-        // Check if the event matches the one we're waiting for
-        if (event.type === eventToWaitFor.type && event.tgt === eventToWaitFor.tgt) {
-          console.log('Event received:', event);
-        }
-      });
-    
-      // Add an event listener on the page that listens for the custom event
-      await page.evaluate(() => {
-        document.addEventListener('customEvent', (e: any) => {
-          const eventData = {
-            type: e.detail.type,
-            ts: e.detail.ts,
-            x: e.detail.x,
-            y: e.detail.y,
-            tgt: e.detail.tgt,
-          };
-          // Call the exposed function when the event occurs
-          window['onCustomEvent'](eventData);  // Using window['onCustomEvent'] syntax
-        });
-      });
-    }
-
-    async errorAlert (page) {
-      const promt = new validationPrompt(page, 0); // index 1 refers to the second object
-      await promt.validatePromptMessage();
-    }
-  
+    console.log('Billing address request URL:', request.url());
   }
+
+  async requestDeliveryMethod(page: Page) {
+    console.log('Requesting delivery method...');
+
+    const billingCheckbox = page.locator('#rm_rmt48__2');
+    const isChecked = await billingCheckbox.isChecked();
+    console.log('Delivery method checkbox is checked:', isChecked);
+
+    await this.page.getByRole('button', { name: 'Submit to Continue' }).click();
+    console.log('Clicked "Submit to Continue" for delivery method.');
+
+    const requestDeliveryDetails = page.waitForRequest((request) =>
+        request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
+    );
+    const request = await requestDeliveryDetails;
+    console.log('Delivery method request URL:', request.url());
+  }
+
+  async selectBillingAddress(page: Page) {
+    console.log('Selecting billing address...');
+
+    const royalMail = page.locator('#rm_rmt48__2');
+    const isChecked = await royalMail.isChecked();
+    console.log('Royal Mail checkbox is checked:', isChecked);
+
+    await this.page.getByRole('button', { name: 'Submit to Continue' }).click();
+    console.log('Clicked "Submit to Continue" for billing address.');
+
+    const requestPaymentDetails = page.waitForRequest((request) =>
+        request.url() === 'https://www.sandbox.paypal.com/xoplatform/logger/api/logger?disableSetCookie=true' && request.method() === 'POST',
+    );
+    const request = await requestPaymentDetails;
+    console.log('Payment details request URL:', request.url());
+  }
+
+  async errorAlert(page: Page) {
+    console.log('Validating error alert...');
+
+    const promt = new validationPrompt(page, 0); // index 1 refers to the second object
+    await promt.validatePromptMessage();
+    console.log('Error alert validation complete.');
+  }
+}
